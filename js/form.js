@@ -68,7 +68,8 @@ document.addEventListener('DOMContentLoaded', function() {
         populateCountries();
         loadSavedData(form);
         setupEventListeners();
-        showStep(formState.currentStep);
+        showStep(formState.currentStep, formSteps, stepIndicators, progressBar, progressPercentage, currentStepDisplay);
+        updateNavigationButtons();
         setupAccessibility();
         updateCities(form);
     }
@@ -84,7 +85,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     e.preventDefault();
                     const stepToGo = parseInt(indicator.getAttribute('data-step'));
                     if (stepToGo < formState.currentStep) {
-                        goToStep(stepToGo, formState, formSteps, stepIndicators, progressBar, progressPercentage, currentStepDisplay);
+                        formState.currentStep = stepToGo;
+                        showStep(formState.currentStep, formSteps, stepIndicators, progressBar, progressPercentage, currentStepDisplay);
+                        updateNavigationButtons();
                     }
                 }
             });
@@ -124,13 +127,21 @@ document.addEventListener('DOMContentLoaded', function() {
         prevBtn.addEventListener('click', () => {
             showError('');
             trackStepTime(formState);
-            prevStep(formState, formSteps, formSteps, stepIndicators, progressBar, progressPercentage, currentStepDisplay);
+            if (formState.currentStep > 1) {
+                formState.currentStep--;
+                showStep(formState.currentStep, formSteps, stepIndicators, progressBar, progressPercentage, currentStepDisplay);
+                updateNavigationButtons();
+            }
         });
         nextBtn.addEventListener('click', () => {
             showError('');
             trackStepTime(formState);
             if (validateStep(formState.currentStep, formSteps, validationRules, fieldDependencies)) {
-                nextStep(formState, formSteps, formSteps, stepIndicators, progressBar, progressPercentage, currentStepDisplay);
+                if (formState.currentStep < formSteps.length) {
+                    formState.currentStep++;
+                    showStep(formState.currentStep, formSteps, stepIndicators, progressBar, progressPercentage, currentStepDisplay);
+                    updateNavigationButtons();
+                }
             }
         });
         submitBtn.addEventListener('click', submitForm);
@@ -140,7 +151,9 @@ document.addEventListener('DOMContentLoaded', function() {
             indicator.addEventListener('click', function() {
                 const stepToGo = parseInt(this.getAttribute('data-step'));
                 if (stepToGo < formState.currentStep) {
-                    goToStep(stepToGo, formState, formSteps, stepIndicators, progressBar, progressPercentage, currentStepDisplay);
+                    formState.currentStep = stepToGo;
+                    showStep(formState.currentStep, formSteps, stepIndicators, progressBar, progressPercentage, currentStepDisplay);
+                    updateNavigationButtons();
                 }
             });
         });
@@ -201,6 +214,33 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     /**
+     * Update navigation buttons visibility based on current step
+     */
+    function updateNavigationButtons() {
+        console.log('Updating navigation buttons for step:', formState.currentStep);
+        
+        if (formState.currentStep === 1) {
+            prevBtn.classList.add('hidden');
+            console.log('Previous button hidden (step 1)');
+        } else {
+            prevBtn.classList.remove('hidden');
+            console.log('Previous button shown (step > 1)');
+        }
+        
+        if (formState.currentStep === formSteps.length) {
+            nextBtn.classList.add('hidden');
+            submitBtn.classList.remove('hidden');
+            console.log('Final step - showing submit button');
+            collectFormData();
+            updateReviewSummary();
+        } else {
+            nextBtn.classList.remove('hidden');
+            submitBtn.classList.add('hidden');
+            console.log('Not final step - showing next button');
+        }
+    }
+
+    /**
      * Handle form submission: validate all steps, send data, and handle errors.
      * @param {Event} e - The submit event.
      */
@@ -214,7 +254,9 @@ document.addEventListener('DOMContentLoaded', function() {
             // Validate all steps
             for (let step = 1; step <= formSteps.length; step++) {
                 if (!validateStep(step)) {
-                    goToStep(step);
+                    formState.currentStep = step;
+                    showStep(formState.currentStep, formSteps, stepIndicators, progressBar, progressPercentage, currentStepDisplay);
+                    updateNavigationButtons();
                     throw new Error('Please fix the errors before submitting');
                 }
             }
@@ -253,7 +295,8 @@ document.addEventListener('DOMContentLoaded', function() {
             // Reset form
             form.reset();
             formState.currentStep = 1;
-            showStep(1);
+            showStep(formState.currentStep, formSteps, stepIndicators, progressBar, progressPercentage, currentStepDisplay);
+            updateNavigationButtons();
             
         } catch (error) {
             console.error('Form submission error:', error);
@@ -270,7 +313,9 @@ document.addEventListener('DOMContentLoaded', function() {
      */
     function recoverFromError() {
         if (formState.lastValidStep < formState.currentStep) {
-            goToStep(formState.lastValidStep, formState, formSteps, stepIndicators, progressBar, progressPercentage, currentStepDisplay);
+            formState.currentStep = formState.lastValidStep;
+            showStep(formState.currentStep, formSteps, stepIndicators, progressBar, progressPercentage, currentStepDisplay);
+            updateNavigationButtons();
         }
     }
 
@@ -321,52 +366,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 
-    // Show the current step and update UI
-    function showStep(step) {
-        // Hide all steps
-        formSteps.forEach(formStep => {
-            formStep.classList.remove('active');
-            formStep.classList.add('hidden');
-        });
-        
-        // Show the current step
-        const currentFormStep = document.querySelector(`.form-step[data-step="${step}"]`);
-        currentFormStep.classList.remove('hidden');
-        currentFormStep.classList.add('active');
-        
-        // Update step indicators
-        stepIndicators.forEach(indicator => {
-            indicator.classList.remove('active');
-            if (parseInt(indicator.getAttribute('data-step')) === step) {
-                indicator.classList.add('active');
-            } else if (parseInt(indicator.getAttribute('data-step')) < step) {
-                indicator.classList.add('completed');
-            }
-        });
-        
-        // Update navigation buttons
-        if (step === 1) {
-            prevBtn.style.display = 'none';
-        } else {
-            prevBtn.style.display = 'inline-block';
-        }
-        
-        if (step === formSteps.length) {
-            nextBtn.style.display = 'none';
-            submitBtn.style.display = 'inline-block';
-            collectFormData();
-            updateReviewSummary();
-        } else {
-            nextBtn.style.display = 'inline-block';
-            submitBtn.style.display = 'none';
-        }
-        
-        // Update progress bar
-        const progress = ((step - 1) / (formSteps.length - 1)) * 100;
-        progressBar.style.width = `${progress}%`;
-        progressPercentage.textContent = `${Math.round(progress)}%`;
-        currentStepDisplay.textContent = step;
-    }
+
     
     /**
      * Populate the country dropdown with all countries from countries-list.
@@ -411,83 +411,104 @@ document.addEventListener('DOMContentLoaded', function() {
      * Update the review summary with all form data for the final step.
      */
     function updateReviewSummary() {
-        // Profile Photo
-        const profilePhotoInput = document.getElementById('profilePhoto');
-        const reviewPhotoDiv = document.getElementById('review-profilePhoto');
-        // Remove any previous image or placeholder
-        reviewPhotoDiv.innerHTML = '';
-        if (profilePhotoInput && profilePhotoInput.files && profilePhotoInput.files[0]) {
-            const file = profilePhotoInput.files[0];
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = document.createElement('img');
-                img.src = e.target.result;
-                img.alt = 'Profile Photo';
-                img.className = 'object-cover w-32 h-32 rounded-full';
-                reviewPhotoDiv.appendChild(img);
-            };
-            reader.readAsDataURL(file);
-        } else {
-            // Show placeholder if no image
-            const span = document.createElement('span');
-            span.className = 'text-gray-400 text-sm';
-            span.textContent = 'No Image';
-            reviewPhotoDiv.appendChild(span);
-        }
+        try {
+            console.log('Updating review summary...');
+            
+            // Profile Photo
+            const profilePhotoInput = document.getElementById('profilePhoto');
+            const reviewPhotoDiv = document.getElementById('review-profilePhoto');
+            console.log('Profile photo elements:', { profilePhotoInput, reviewPhotoDiv });
+            
+            if (reviewPhotoDiv) {
+                // Remove any previous image or placeholder
+                reviewPhotoDiv.innerHTML = '';
+                if (profilePhotoInput && profilePhotoInput.files && profilePhotoInput.files[0]) {
+                    const file = profilePhotoInput.files[0];
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.alt = 'Profile Photo';
+                        img.className = 'object-cover w-32 h-32 rounded-full';
+                        reviewPhotoDiv.appendChild(img);
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    // Show placeholder if no image
+                    const span = document.createElement('span');
+                    span.className = 'text-gray-400 text-sm';
+                    span.textContent = 'No Image';
+                    reviewPhotoDiv.appendChild(span);
+                }
+            }
 
-        // Personal Info
-        document.getElementById('review-fullName').textContent = document.getElementById('fullName').value || 'Not provided';
-        document.getElementById('review-dob').textContent = document.getElementById('dob').value || 'Not provided';
-        document.getElementById('review-gender').textContent = document.querySelector('input[name="gender"]:checked')?.value || 'Not provided';
-        document.getElementById('review-nationalId').textContent = document.getElementById('nationalId').value || 'Not provided';
-        
-        // Contact Info
-        document.getElementById('review-email').textContent = document.getElementById('email').value || 'Not provided';
-        document.getElementById('review-mobile').textContent = document.getElementById('mobile').value || 'Not provided';
-        document.getElementById('review-alternateContact').textContent = document.getElementById('alternateContact').value || 'Not provided';
-        document.getElementById('review-country').textContent = document.getElementById('country').value || 'Not provided';
-        document.getElementById('review-city').textContent = document.getElementById('city').value || 'Not provided';
-        document.getElementById('review-currentAddress').textContent = document.getElementById('currentAddress').value || 'Not provided';
-        document.getElementById('review-permanentAddress').textContent = document.getElementById('permanentAddress').value || 'Not provided';
-        
-        // Education
-        document.getElementById('review-highestDegree').textContent = document.getElementById('highestDegree').value || 'Not provided';
-        document.getElementById('review-fieldOfStudy').textContent = document.getElementById('fieldOfStudy').value || 'Not provided';
-        document.getElementById('review-institution').textContent = document.getElementById('institution').value || 'Not provided';
-        document.getElementById('review-graduationYear').textContent = document.getElementById('graduationYear').value || 'Not provided';
-        document.getElementById('review-gpa').textContent = document.getElementById('gpa').value || 'Not provided';
-        
-        // Certifications
-        const certificationInputs = document.querySelectorAll('input[name="certifications[]"]');
-        const certifications = Array.from(certificationInputs).map(input => input.value).filter(value => value.trim() !== '');
-        document.getElementById('review-certifications').textContent = certifications.length > 0 ? certifications.join(', ') : 'None';
-        
-        // Experience
-        document.getElementById('review-currentJobTitle').textContent = document.getElementById('currentJobTitle').value || 'Not provided';
-        document.getElementById('review-companyName').textContent = document.getElementById('companyName').value || 'Not provided';
-        document.getElementById('review-totalExperience').textContent = document.getElementById('totalExperience').value || 'Not provided';
-        
-        // Previous Jobs
-        const previousJobInputs = document.querySelectorAll('input[name="previousJobs[]"]');
-        const previousJobs = Array.from(previousJobInputs).map(input => input.value).filter(value => value.trim() !== '');
-        document.getElementById('review-previousJobs').textContent = previousJobs.length > 0 ? previousJobs.join(', ') : 'None';
-        
-        document.getElementById('review-responsibilities').textContent = document.getElementById('responsibilities').value || 'Not provided';
-        
-        // Skills
-        const technicalSkills = Array.from(document.querySelectorAll('input[name="technicalSkills"]:checked')).map(input => input.value);
-        document.getElementById('review-technicalSkills').textContent = technicalSkills.length > 0 ? technicalSkills.join(', ') : 'None';
-        
-        const softSkills = Array.from(document.querySelectorAll('input[name="softSkills"]:checked')).map(input => input.value);
-        document.getElementById('review-softSkills').textContent = softSkills.length > 0 ? softSkills.join(', ') : 'None';
-        
-        document.getElementById('review-jobType').textContent = document.getElementById('jobType').value || 'Not specified';
-        document.getElementById('review-relocate').textContent = document.querySelector('input[name="relocate"]:checked')?.value || 'Not specified';
-        
-        const expectedSalary = document.getElementById('expectedSalary').value;
-        const salaryCurrency = document.getElementById('salaryCurrency').value;
-        document.getElementById('review-expectedSalary').textContent = expectedSalary ? 
-            `${salaryCurrency} ${expectedSalary}` : 'Not specified';
+            // Helper function to safely update review elements
+            function updateReviewElement(elementId, value, defaultValue = 'Not provided') {
+                const element = document.getElementById(elementId);
+                if (element) {
+                    element.textContent = value || defaultValue;
+                    console.log(`Updated ${elementId}:`, value || defaultValue);
+                } else {
+                    console.warn(`Element not found: ${elementId}`);
+                }
+            }
+
+            // Personal Info
+            updateReviewElement('review-fullName', document.getElementById('fullName')?.value);
+            updateReviewElement('review-dob', document.getElementById('dob')?.value);
+            updateReviewElement('review-gender', document.querySelector('input[name="gender"]:checked')?.value);
+            updateReviewElement('review-nationalId', document.getElementById('nationalId')?.value);
+            
+            // Contact Info
+            updateReviewElement('review-email', document.getElementById('email')?.value);
+            updateReviewElement('review-mobile', document.getElementById('mobile')?.value);
+            updateReviewElement('review-alternateContact', document.getElementById('alternateContact')?.value);
+            updateReviewElement('review-country', document.getElementById('country')?.value);
+            updateReviewElement('review-city', document.getElementById('city')?.value);
+            updateReviewElement('review-currentAddress', document.getElementById('currentAddress')?.value);
+            updateReviewElement('review-permanentAddress', document.getElementById('permanentAddress')?.value);
+            
+            // Education
+            updateReviewElement('review-highestDegree', document.getElementById('highestDegree')?.value);
+            updateReviewElement('review-fieldOfStudy', document.getElementById('fieldOfStudy')?.value);
+            updateReviewElement('review-institution', document.getElementById('institution')?.value);
+            updateReviewElement('review-graduationYear', document.getElementById('graduationYear')?.value);
+            updateReviewElement('review-gpa', document.getElementById('gpa')?.value);
+            
+            // Certifications
+            const certificationInputs = document.querySelectorAll('input[name="certifications[]"]');
+            const certifications = Array.from(certificationInputs).map(input => input.value).filter(value => value.trim() !== '');
+            updateReviewElement('review-certifications', certifications.length > 0 ? certifications.join(', ') : null, 'None');
+            
+            // Experience
+            updateReviewElement('review-currentJobTitle', document.getElementById('currentJobTitle')?.value);
+            updateReviewElement('review-companyName', document.getElementById('companyName')?.value);
+            updateReviewElement('review-totalExperience', document.getElementById('totalExperience')?.value);
+            
+            // Previous Jobs
+            const previousJobInputs = document.querySelectorAll('input[name="previousJobs[]"]');
+            const previousJobs = Array.from(previousJobInputs).map(input => input.value).filter(value => value.trim() !== '');
+            updateReviewElement('review-previousJobs', previousJobs.length > 0 ? previousJobs.join(', ') : null, 'None');
+            
+            updateReviewElement('review-responsibilities', document.getElementById('responsibilities')?.value);
+            
+            // Skills
+            const technicalSkills = Array.from(document.querySelectorAll('input[name="technicalSkills"]:checked')).map(input => input.value);
+            updateReviewElement('review-technicalSkills', technicalSkills.length > 0 ? technicalSkills.join(', ') : null, 'None');
+            
+            const softSkills = Array.from(document.querySelectorAll('input[name="softSkills"]:checked')).map(input => input.value);
+            updateReviewElement('review-softSkills', softSkills.length > 0 ? softSkills.join(', ') : null, 'None');
+            
+            updateReviewElement('review-jobType', document.getElementById('jobType')?.value, 'Not specified');
+            updateReviewElement('review-relocate', document.querySelector('input[name="relocate"]:checked')?.value, 'Not specified');
+            
+            const expectedSalary = document.getElementById('expectedSalary')?.value;
+            const salaryCurrency = document.getElementById('salaryCurrency')?.value;
+            updateReviewElement('review-expectedSalary', expectedSalary ? `${salaryCurrency} ${expectedSalary}` : null, 'Not specified');
+            
+        } catch (error) {
+            console.error('Error updating review summary:', error);
+        }
     }
     
     /**
