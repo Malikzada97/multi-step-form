@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Multi-step form with progress indicator and validation">
+    <meta name="csrf-token" content="{{csrf_token}}">
+    <title>Multi-Step Form with Progress Indicator</title>
+    <!-- Preload critical assets -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" as="style">
+    <link rel="preload" href="./css/style.css" as="style">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="./css/style.css">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #4338ca;
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-4xl mx-auto">
+        <!-- Global Error Region -->
+        <div id="globalError" class="mb-4 text-red-600 font-semibold" aria-live="assertive" style="display:none;"></div>
+        <!-- Progress Bar -->
+        <div class="mb-8" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <div class="flex justify-between mb-2">
+                <div class="text-sm font-medium text-gray-600">Progress <span id="progress-percentage">0%</span></div>
+                <div class="text-sm font-medium">Step <span id="current-step">1</span> of <span id="total-steps">6</span></div>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div id="progress-bar" class="bg-indigo-600 h-2.5 rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
+            </div>
+            <div class="flex justify-between mt-4" role="tablist">
+                <div class="step-indicator active" data-step="1" role="tab" aria-selected="true" aria-label="Personal Information" tabindex="0">Personal Info</div>
+                <div class="step-indicator" data-step="2" role="tab" aria-selected="false" aria-label="Contact Information" tabindex="0">Contact Info</div>
+                <div class="step-indicator" data-step="3" role="tab" aria-selected="false" aria-label="Education" tabindex="0">Education</div>
+                <div class="step-indicator" data-step="4" role="tab" aria-selected="false" aria-label="Experience" tabindex="0">Experience</div>
+                <div class="step-indicator" data-step="5" role="tab" aria-selected="false" aria-label="Skills" tabindex="0">Skills</div>
+                <div class="step-indicator" data-step="6" role="tab" aria-selected="false" aria-label="Review" tabindex="0">Review</div>
+            </div>
+        </div>
+
+        <!-- Form Container -->
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-500 ease-in-out">
+            <form id="multiStepForm" class="p-6 md:p-8" novalidate>
+                <!-- Step 1: Personal Information -->
+                <div class="form-step active" data-step="1" role="tabpanel" aria-labelledby="step-1">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Personal Information</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="fullName" class="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+                            <input type="text" id="fullName" name="fullName" required 
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                                aria-required="true"
+                                aria-describedby="fullName-error">
+                            <div id="fullName-error" class="error-message text-red-500 text-sm mt-1" role="alert"></div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="dob" class="block text-sm font-medium text-gray-700 mb-1">Date of Birth *</label>
+                                <input type="date" id="dob" name="dob" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                                <div class="error-message text-red-500 text-sm mt-1"></div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Gender *</label>
+                                <div class="flex space-x-4">
+                                    <label class="inline-flex items-center">
+                                        <input type="radio" name="gender" value="Male" required class="h-4 w-4 text-indigo-600 focus:ring-indigo-500">
+                                        <span class="ml-2 text-gray-700">Male</span>
+                                    </label>
+                                    <label class="inline-flex items-center">
+                                        <input type="radio" name="gender" value="Female" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500">
+                                        <span class="ml-2 text-gray-700">Female</span>
+                                    </label>
+                                    <label class="inline-flex items-center">
+                                        <input type="radio" name="gender" value="Other" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500">
+                                        <span class="ml-2 text-gray-700">Other</span>
+                                    </label>
+                                </div>
+                                <div class="error-message text-red-500 text-sm mt-1"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="nationalId" class="block text-sm font-medium text-gray-700 mb-1">National ID / Passport Number *</label>
+                            <input type="text" id="nationalId" name="nationalId" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                            <div class="error-message text-red-500 text-sm mt-1"></div>
+                        </div>
+                        <div>
+                            <label for="profilePhoto" class="block text-sm font-medium text-gray-700 mb-1">Profile Photo *</label>
+                            <input type="file" id="profilePhoto" name="profilePhoto" accept="image/*" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Contact Information -->
+                <div class="form-step hidden" data-step="2">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Contact Information</h2>
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address *</label>
+                                <input type="email" id="email" name="email" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                                <div class="error-message text-red-500 text-sm mt-1"></div>
+                            </div>
+                            <div>
+                                <label for="mobile" class="block text-sm font-medium text-gray-700 mb-1">Mobile Number *</label>
+                                <input type="tel" id="mobile" name="mobile" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                                <div class="error-message text-red-500 text-sm mt-1"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="alternateContact" class="block text-sm font-medium text-gray-700 mb-1">Alternate Contact Number</label>
+                            <input type="tel" id="alternateContact" name="alternateContact" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                        </div>
+                        <div>
+                            <label for="currentAddress" class="block text-sm font-medium text-gray-700 mb-1">Current Address</label>
+                            <textarea id="currentAddress" name="currentAddress" rows="2" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"></textarea>
+                        </div>
+                        <div>
+                            <label for="permanentAddress" class="block text-sm font-medium text-gray-700 mb-1">Permanent Address</label>
+                            <textarea id="permanentAddress" name="permanentAddress" rows="2" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"></textarea>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="country" class="block text-sm font-medium text-gray-700 mb-1">Country *</label>
+                                <select id="country" name="country" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                                    <option value="">Select Country</option>
+                                </select>
+                                <div class="error-message text-red-500 text-sm mt-1"></div>
+                            </div>
+                            <div>
+                                <label for="city" class="block text-sm font-medium text-gray-700 mb-1">City *</label>
+                                <select id="city" name="city" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                                    <option value="">Select City</option>
+                                </select>
+                                <div class="error-message text-red-500 text-sm mt-1"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Educational Background -->
+                <div class="form-step hidden" data-step="3">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Educational Background</h2>
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="highestDegree" class="block text-sm font-medium text-gray-700 mb-1">Highest Degree *</label>
+                                <select id="highestDegree" name="highestDegree" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                                    <option value="">Select Degree</option>
+                                    <option value="High School">High School</option>
+                                    <option value="Associate Degree">Associate Degree</option>
+                                    <option value="Bachelor's Degree">Bachelor's Degree</option>
+                                    <option value="Master's Degree">Master's Degree</option>
+                                    <option value="Doctorate">Doctorate</option>
+                                </select>
+                                <div class="error-message text-red-500 text-sm mt-1"></div>
+                            </div>
+                            <div>
+                                <label for="fieldOfStudy" class="block text-sm font-medium text-gray-700 mb-1">Field of Study</label>
+                                <input type="text" id="fieldOfStudy" name="fieldOfStudy" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="institution" class="block text-sm font-medium text-gray-700 mb-1">University / Institution Name</label>
+                            <input type="text" id="institution" name="institution" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="graduationYear" class="block text-sm font-medium text-gray-700 mb-1">Graduation Year *</label>
+                                <input type="number" id="graduationYear" name="graduationYear" min="1900" max="2099" step="1" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                                <div class="error-message text-red-500 text-sm mt-1"></div>
+                            </div>
+                            <div>
+                                <label for="gpa" class="block text-sm font-medium text-gray-700 mb-1">GPA / Grade</label>
+                                <input type="text" id="gpa" name="gpa" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Additional Certifications</label>
+                            <div id="certifications-container" class="space-y-2">
+                                <!-- Certifications will be added here -->
+                            </div>
+                            <button type="button" id="add-certification" class="mt-2 inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                + Add Certification
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Work Experience -->
+                <div class="form-step hidden" data-step="4">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Work Experience</h2>
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="currentJobTitle" class="block text-sm font-medium text-gray-700 mb-1">Current Job Title *</label>
+                                <input type="text" id="currentJobTitle" name="currentJobTitle" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                            </div>
+                            <div>
+                                <label for="companyName" class="block text-sm font-medium text-gray-700 mb-1">Company Name *</label>
+                                <input type="text" id="companyName" name="companyName" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="totalExperience" class="block text-sm font-medium text-gray-700 mb-1">Total Experience *</label>
+                            <select id="totalExperience" name="totalExperience" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                                <option value="">Select Experience</option>
+                                <option value="0-1">Less than 1 year</option>
+                                <option value="1-3">1-3 years</option>
+                                <option value="3-5">3-5 years</option>
+                                <option value="5-10">5-10 years</option>
+                                <option value="10+">10+ years</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Previous Job Titles</label>
+                            <div id="previousJobs-container" class="space-y-2">
+                                <!-- Previous jobs will be added here -->
+                            </div>
+                            <button type="button" id="add-previousJob" class="mt-2 inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                + Add Previous Job
+                            </button>
+                        </div>
+                        <div>
+                            <label for="responsibilities" class="block text-sm font-medium text-gray-700 mb-1">Key Responsibilities *</label>
+                            <textarea id="responsibilities" name="responsibilities" required rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 5: Skills & Preferences -->
+                <div class="form-step hidden" data-step="5">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Skills & Preferences</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Technical Skills</label>
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+                                <label class="inline-flex items-center">
+                                    <input type="checkbox" name="technicalSkills" value="HTML" required class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 rounded">
+                                    <span class="ml-2 text-gray-700">HTML</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="checkbox" name="technicalSkills" value="CSS" required class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 rounded">
+                                    <span class="ml-2 text-gray-700">CSS</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="checkbox" name="technicalSkills" value="JavaScript" required class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 rounded">
+                                    <span class="ml-2 text-gray-700">JavaScript</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="checkbox" name="technicalSkills" value="Python" required class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 rounded">
+                                    <span class="ml-2 text-gray-700">Python</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="checkbox" name="technicalSkills" value="React" required class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 rounded">
+                                    <span class="ml-2 text-gray-700">React</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="checkbox" name="technicalSkills" value="Node.js" required class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 rounded">
+                                    <span class="ml-2 text-gray-700">Node.js</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Soft Skills</label>
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+                                <label class="inline-flex items-center">
+                                    <input type="checkbox" name="softSkills" value="Communication" required class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 rounded">
+                                    <span class="ml-2 text-gray-700">Communication</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="checkbox" name="softSkills" value="Teamwork" required class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 rounded">
+                                    <span class="ml-2 text-gray-700">Teamwork</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="checkbox" name="softSkills" value="Leadership" required class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 rounded">
+                                    <span class="ml-2 text-gray-700">Leadership</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="checkbox" name="softSkills" value="Problem Solving" required class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 rounded">
+                                    <span class="ml-2 text-gray-700">Problem Solving</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="checkbox" name="softSkills" value="Time Management" required class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 rounded">
+                                    <span class="ml-2 text-gray-700">Time Management</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="checkbox" name="softSkills" value="Adaptability" required class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 rounded">
+                                    <span class="ml-2 text-gray-700">Adaptability</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="jobType" class="block text-sm font-medium text-gray-700 mb-1">Preferred Job Type *</label>
+                                <select id="jobType" name="jobType" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                                    <option value="">Select Job Type</option>
+                                    <option value="Full-time">Full-time</option>
+                                    <option value="Part-time">Part-time</option>
+                                    <option value="Contract">Contract</option>
+                                    <option value="Remote">Remote</option>
+                                    <option value="Freelance">Freelance</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Willing to Relocate?</label>
+                                <div class="flex space-x-4">
+                                    <label class="inline-flex items-center">
+                                        <input type="radio" name="relocate" value="Yes" required class="h-4 w-4 text-indigo-600 focus:ring-indigo-500">
+                                        <span class="ml-2 text-gray-700">Yes</span>
+                                    </label>
+                                    <label class="inline-flex items-center">
+                                        <input type="radio" name="relocate" value="No" required class="h-4 w-4 text-indigo-600 focus:ring-indigo-500">
+                                        <span class="ml-2 text-gray-700">No</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="expectedSalary" class="block text-sm font-medium text-gray-700 mb-1">Expected Salary *</label>
+                            <div class="flex">
+                                <select id="salaryCurrency" name="salaryCurrency" class="px-4 py-2 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition bg-gray-100">
+                                    <option value="USD">USD</option>
+                                    <option value="EUR">EUR</option>
+                                    <option value="GBP">GBP</option>
+                                    <option value="INR">INR</option>
+                                </select>
+                                <input type="number" id="expectedSalary" name="expectedSalary" required class="w-full px-4 py-2 border-t border-b border-r border-gray-300 rounded-r-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 6: Final Review -->
+                <div class="form-step hidden" data-step="6">
+                    <div class="bg-white shadow-lg rounded-2xl p-8 print:p-4 max-w-3xl mx-auto border border-gray-200">
+                        <div class="flex flex-col md:flex-row md:items-center md:space-x-8 mb-8">
+                            <div class="flex-shrink-0 flex justify-center md:block mb-4 md:mb-0">
+                                <div id="review-profilePhoto" class="w-32 h-32 rounded-full bg-gray-100 border-2 border-gray-300 flex items-center justify-center overflow-hidden">
+                                    <!-- Profile image will be inserted here -->
+                                    <span class="text-gray-400 text-sm">No Image</span>
+                                </div>
+                            </div>
+                            <div class="flex-1">
+                                <h2 class="text-3xl font-bold text-gray-800 mb-2" id="review-fullName"></h2>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-gray-700 text-sm">
+                                    <div><span class="font-semibold">Date of Birth:</span> <span id="review-dob"></span></div>
+                                    <div><span class="font-semibold">Gender:</span> <span id="review-gender"></span></div>
+                                    <div><span class="font-semibold">National ID:</span> <span id="review-nationalId"></span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="border-t border-gray-200 pt-6 mt-6">
+                            <h3 class="text-xl font-semibold text-indigo-700 mb-2">Contact Information</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-gray-700 text-sm mb-4">
+                                <div><span class="font-semibold">Email:</span> <span id="review-email"></span></div>
+                                <div><span class="font-semibold">Mobile:</span> <span id="review-mobile"></span></div>
+                                <div><span class="font-semibold">Alternate Contact:</span> <span id="review-alternateContact"></span></div>
+                                <div><span class="font-semibold">Country:</span> <span id="review-country"></span></div>
+                                <div><span class="font-semibold">City:</span> <span id="review-city"></span></div>
+                                <div class="md:col-span-2"><span class="font-semibold">Current Address:</span> <span id="review-currentAddress"></span></div>
+                                <div class="md:col-span-2"><span class="font-semibold">Permanent Address:</span> <span id="review-permanentAddress"></span></div>
+                            </div>
+                        </div>
+                        <div class="border-t border-gray-200 pt-6 mt-6">
+                            <h3 class="text-xl font-semibold text-indigo-700 mb-2">Education</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-gray-700 text-sm mb-4">
+                                <div><span class="font-semibold">Highest Degree:</span> <span id="review-highestDegree"></span></div>
+                                <div><span class="font-semibold">Field of Study:</span> <span id="review-fieldOfStudy"></span></div>
+                                <div><span class="font-semibold">Institution:</span> <span id="review-institution"></span></div>
+                                <div><span class="font-semibold">Graduation Year:</span> <span id="review-graduationYear"></span></div>
+                                <div><span class="font-semibold">GPA:</span> <span id="review-gpa"></span></div>
+                                <div class="md:col-span-2"><span class="font-semibold">Certifications:</span> <span id="review-certifications"></span></div>
+                            </div>
+                        </div>
+                        <div class="border-t border-gray-200 pt-6 mt-6">
+                            <h3 class="text-xl font-semibold text-indigo-700 mb-2">Work Experience</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-gray-700 text-sm mb-4">
+                                <div><span class="font-semibold">Current Job:</span> <span id="review-currentJobTitle"></span></div>
+                                <div><span class="font-semibold">Company:</span> <span id="review-companyName"></span></div>
+                                <div><span class="font-semibold">Experience:</span> <span id="review-totalExperience"></span></div>
+                                <div class="md:col-span-2"><span class="font-semibold">Previous Jobs:</span> <span id="review-previousJobs"></span></div>
+                                <div class="md:col-span-2"><span class="font-semibold">Responsibilities:</span> <span id="review-responsibilities"></span></div>
+                            </div>
+                        </div>
+                        <div class="border-t border-gray-200 pt-6 mt-6">
+                            <h3 class="text-xl font-semibold text-indigo-700 mb-2">Skills & Preferences</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-gray-700 text-sm mb-4">
+                                <div><span class="font-semibold">Technical Skills:</span> <span id="review-technicalSkills"></span></div>
+                                <div><span class="font-semibold">Soft Skills:</span> <span id="review-softSkills"></span></div>
+                                <div><span class="font-semibold">Job Type:</span> <span id="review-jobType"></span></div>
+                                <div><span class="font-semibold">Relocate:</span> <span id="review-relocate"></span></div>
+                                <div><span class="font-semibold">Expected Salary:</span> <span id="review-expectedSalary"></span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Navigation Buttons -->
+                <div class="flex justify-between mt-8">
+                    <button type="button" id="prevBtn" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition" aria-label="Go to previous step">
+                        Previous
+                    </button>
+                    <div class="flex-grow"></div>
+                    <button type="button" id="nextBtn" class="px-6 py-2 border border-transparent rounded-lg shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition" aria-label="Go to next step">
+                        Next
+                    </button>
+                    <button type="submit" id="submitBtn" class="hidden px-6 py-2 border border-transparent rounded-lg shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition" aria-label="Submit application">
+                        Submit Application
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center" aria-hidden="true">
+        <div class="bg-white p-4 rounded-lg shadow-lg">
+            <div class="loading-spinner"></div>
+            <p class="mt-2 text-gray-700">Processing...</p>
+        </div>
+    </div>
+    
+    <!-- JavaScript -->
+    <script src="./js/countries.js"></script>
+    <script type="module" src="./js/form.js"></script>
+</body>
+</html>

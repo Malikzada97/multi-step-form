@@ -1,0 +1,86 @@
+/*
+ * Custom CSS for Multi-Step Form
+ * - Only classes used in HTML/JS or for accessibility are included
+ * - Prefer Tailwind for layout, color, and spacing
+ */
+
+/* Base styles */
+:root {
+    --primary: #4f46e5;
+    --primary-dark: #4338ca;
+    --error: #dc2626;
+    --success: #059669;
+    --warning: #d97706;
+}
+
+/* Accessibility improvements */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Focus styles */
+:focus {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+/* Form step transitions */
+.form-step {
+    transition: opacity 0.3s ease-in-out;
+}
+.form-step.hidden {
+    display: none;
+    opacity: 0;
+}
+.form-step.active {
+    display: block;
+    opacity: 1;
+}
+
+/* Error message styling */
+.error-message {
+    color: var(--error);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+/* Step indicators */
+.step-indicator {
+    position: relative;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.step-indicator.active {
+    color: var(--primary);
+    font-weight: 600;
+}
+.step-indicator.completed {
+    color: var(--success);
+}
+
+/* Responsive improvements */
+@media (max-width: 640px) {
+    .step-indicator {
+        font-size: 0.875rem;
+        padding: 0.25rem 0.5rem;
+    }
+    .form-step {
+        padding: 1rem;
+    }
+}
+
+/* Print styles (keep only if .form-step is used for print) */
+@media print {
+    .form-step {
+        break-inside: avoid;
+    }
+}
