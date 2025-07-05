@@ -70,8 +70,11 @@
 /* Responsive improvements */
 @media (max-width: 640px) {
     .step-indicator {
-        font-size: 0.875rem;
-        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+        padding: 0.5rem 0.75rem;
+        margin: 0.125rem;
+        white-space: nowrap;
+        min-width: fit-content;
     }
     .form-step {
         padding: 1rem;

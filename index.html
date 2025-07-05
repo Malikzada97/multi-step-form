@@ -6,6 +6,8 @@
     <meta name="description" content="Multi-step form with progress indicator and validation">
     <meta name="csrf-token" content="{{csrf_token}}">
     <title>Multi-Step Form with Progress Indicator</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📝</text></svg>">
     <!-- Preload critical assets -->
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" as="style">
     <link rel="preload" href="./css/style.css" as="style">
@@ -31,14 +33,14 @@
         <div id="globalError" class="mb-4 text-red-600 font-semibold" aria-live="assertive" style="display:none;"></div>
         <!-- Progress Bar -->
         <div class="mb-8" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-            <div class="flex justify-between mb-2">
+            <div class="flex flex-col sm:flex-row sm:justify-between mb-2 gap-1">
                 <div class="text-sm font-medium text-gray-600">Progress <span id="progress-percentage">0%</span></div>
                 <div class="text-sm font-medium">Step <span id="current-step">1</span> of <span id="total-steps">6</span></div>
             </div>
             <div class="w-full bg-gray-200 rounded-full h-2.5">
                 <div id="progress-bar" class="bg-indigo-600 h-2.5 rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
             </div>
-            <div class="flex justify-between mt-4" role="tablist">
+            <div class="flex flex-wrap justify-center gap-2 mt-4" role="tablist">
                 <div class="step-indicator active" data-step="1" role="tab" aria-selected="true" aria-label="Personal Information" tabindex="0">Personal Info</div>
                 <div class="step-indicator" data-step="2" role="tab" aria-selected="false" aria-label="Contact Information" tabindex="0">Contact Info</div>
                 <div class="step-indicator" data-step="3" role="tab" aria-selected="false" aria-label="Education" tabindex="0">Education</div>
