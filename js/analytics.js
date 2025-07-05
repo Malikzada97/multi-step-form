@@ -21,23 +21,4 @@ export function trackStepTime(formState) {
     analytics.startTime = now;
 }
 
-/**
- * Track a field interaction (focus event).
- * @param {string} fieldName
- */
-export function trackFieldInteraction(fieldName) {
-    analytics.fieldInteractions[fieldName] = (analytics.fieldInteractions[fieldName] || 0) + 1;
-}
-
-/**
- * Track a validation error for analytics.
- * @param {string} field
- * @param {number} step
- */
-export function trackError(field, step) {
-    analytics.errors.push({
-        field,
-        step,
-        timestamp: Date.now()
-    });
-} 
+ 

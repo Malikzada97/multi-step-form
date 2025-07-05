@@ -48,10 +48,4 @@ export function loadSavedData(form) {
     });
 }
 
-/**
- * Restore form data from backup (alias for loadSavedData).
- * @param {HTMLFormElement} form
- */
-export function restoreForm(form) {
-    loadSavedData(form);
-} 
+ 

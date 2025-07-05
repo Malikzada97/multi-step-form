@@ -30,23 +30,4 @@ export function showStep(step, formSteps, stepIndicators, progressBar, progressP
     currentStepDisplay.textContent = step;
 }
 
-export function nextStep(formState, formSteps, stepIndicators, progressBar, progressPercentage, currentStepDisplay) {
-    if (formState.currentStep < formSteps.length) {
-        formState.currentStep++;
-        showStep(formState.currentStep, formSteps, stepIndicators, progressBar, progressPercentage, currentStepDisplay);
-    }
-}
-
-export function prevStep(formState, formSteps, stepIndicators, progressBar, progressPercentage, currentStepDisplay) {
-    if (formState.currentStep > 1) {
-        formState.currentStep--;
-        showStep(formState.currentStep, formSteps, stepIndicators, progressBar, progressPercentage, currentStepDisplay);
-    }
-}
-
-export function goToStep(step, formState, formSteps, stepIndicators, progressBar, progressPercentage, currentStepDisplay) {
-    if (step >= 1 && step <= formSteps.length) {
-        formState.currentStep = step;
-        showStep(formState.currentStep, formSteps, stepIndicators, progressBar, progressPercentage, currentStepDisplay);
-    }
-} 
+ 

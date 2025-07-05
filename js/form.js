@@ -17,10 +17,10 @@
  */
 
 // Modularized imports
-import { showStep, nextStep, prevStep, goToStep } from './navigation.js';
+import { showStep } from './navigation.js';
 import { validationRules, fieldDependencies, validateStep } from './validation.js';
-import { saveFormData, loadSavedData, restoreForm } from './autosave.js';
-import { analytics, trackStepTime, trackFieldInteraction, trackError } from './analytics.js';
+import { saveFormData, loadSavedData } from './autosave.js';
+import { analytics, trackStepTime } from './analytics.js';
 import { addCertificationField, addPreviousJobField } from './dynamicFields.js';
 
 /**
@@ -217,26 +217,20 @@ document.addEventListener('DOMContentLoaded', function() {
      * Update navigation buttons visibility based on current step
      */
     function updateNavigationButtons() {
-        console.log('Updating navigation buttons for step:', formState.currentStep);
-        
         if (formState.currentStep === 1) {
             prevBtn.classList.add('hidden');
-            console.log('Previous button hidden (step 1)');
         } else {
             prevBtn.classList.remove('hidden');
-            console.log('Previous button shown (step > 1)');
         }
         
         if (formState.currentStep === formSteps.length) {
             nextBtn.classList.add('hidden');
             submitBtn.classList.remove('hidden');
-            console.log('Final step - showing submit button');
             collectFormData();
             updateReviewSummary();
         } else {
             nextBtn.classList.remove('hidden');
             submitBtn.classList.add('hidden');
-            console.log('Not final step - showing next button');
         }
     }
 
@@ -253,7 +247,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Validate all steps
             for (let step = 1; step <= formSteps.length; step++) {
-                if (!validateStep(step)) {
+                if (!validateStep(step, formSteps, validationRules, fieldDependencies)) {
                     formState.currentStep = step;
                     showStep(formState.currentStep, formSteps, stepIndicators, progressBar, progressPercentage, currentStepDisplay);
                     updateNavigationButtons();
@@ -412,12 +406,9 @@ document.addEventListener('DOMContentLoaded', function() {
      */
     function updateReviewSummary() {
         try {
-            console.log('Updating review summary...');
-            
             // Profile Photo
             const profilePhotoInput = document.getElementById('profilePhoto');
             const reviewPhotoDiv = document.getElementById('review-profilePhoto');
-            console.log('Profile photo elements:', { profilePhotoInput, reviewPhotoDiv });
             
             if (reviewPhotoDiv) {
                 // Remove any previous image or placeholder
@@ -447,9 +438,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 const element = document.getElementById(elementId);
                 if (element) {
                     element.textContent = value || defaultValue;
-                    console.log(`Updated ${elementId}:`, value || defaultValue);
-                } else {
-                    console.warn(`Element not found: ${elementId}`);
                 }
             }
 
